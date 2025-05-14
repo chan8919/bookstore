@@ -48,9 +48,9 @@ const login = async (req, res) => {
         res.status(500).json({"message":"이유는 모르겠는데 실패함"});
     }
 }
-const passwordResetRequest = async (req, res) => {
+const resetRequestPassword = async (req, res) => {
     const { email } = req.body;
-    console.log('passwordResetRequest 호출됬음');
+    console.log('resetRequestPassword 호출됬음');
     try {
         const isExist = await memberModel.isExistByEmail(email);
         if(isExist){
@@ -66,8 +66,8 @@ const passwordResetRequest = async (req, res) => {
         return;
     }
 }
-const passwordReset = async (req, res) => {
-    console.log('passwordReset 호출됬음');
+const resetPassword = async (req, res) => {
+    console.log('resetPassword 호출됬음');
     const { email,pwd } = req.body;
     try {
         const isExist = await memberModel.isExistByEmail(email);
@@ -87,4 +87,4 @@ const passwordReset = async (req, res) => {
     }
 }
 
-module.exports = { join,login,passwordReset,passwordResetRequest };
+module.exports = { join,login,resetPassword,resetRequestPassword };

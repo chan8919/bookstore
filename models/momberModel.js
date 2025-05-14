@@ -70,6 +70,7 @@ function isPasswordMatched(email,pwd){
 function resetPassword(email,pwd){
     return new Promise((resolve,reject)=>{
         const sql = 'UPDATE members SET pwd = ?, salt = ? WHERE email = ?';
+        
         const salt = crypto.randomBytes(10).toString('base64');
         const hashedPwd = crypto.pbkdf2Sync(pwd,salt,10000,10,'sha512').toString('base64');
 
