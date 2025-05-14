@@ -69,8 +69,11 @@ function isPasswordMatched(email,pwd){
 /** member의 pwd를 변경한다. email과 pwd가 필요함. */
 function resetPassword(email,pwd){
     return new Promise((resolve,reject)=>{
-        const sql = 'UPDATE members SET pwd = ? WHERE email = ?';
-        db.query(sql,[pwd,email],(err,result)=>{
+        const sql = 'UPDATE members SET pwd = ?, salt = ? WHERE email = ?';
+        const salt = crypto.randomBytes(10).toString('base64');
+        const hashedPwd = crypto.pbkdf2Sync(pwd,salt,10000,10,'sha512').toString('base64');
+
+        db.query(sql,[hashedPwd,salt,email],(err,result)=>{
             if(err){
                 console.log(err);
                 reject(err);
