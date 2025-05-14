@@ -24,7 +24,7 @@ function isExistByEmail(email) {
 /** member를 추가합니다.추가에 필요한 member로 email, name, pwd 를 가진 객체가 필요합니다. */
 function addMember(member) {
     return new Promise((resolve, reject) => {
-        const sql = 'INSERT INTO members (email,name,pwd,salt)  VALUES ( ?,?,?)';
+        const sql = 'INSERT INTO members (email,name,pwd,salt)  VALUES ( ?,?,?,?)';
 
         // 비밀번호 암호화 및 salt 생성성
         const salt = crypto.randomBytes(10).toString('base64');
@@ -45,17 +45,23 @@ function addMember(member) {
 
 }
 
-/** member의 email, pwd가 매치하는지 여부를 확인합니다. email에 대한 pwd가 일치할 경우 1을 리턴합니다*/
+/** member의 email, pwd가 매치하는지 여부를 확인합니다. email에 대한 pwd가 일치할 경우 true값을 리턴합니다*/
 function isPasswordMatched(email,pwd){
     return new Promise((resolve,reject)=>{
-        const sql = 'SELECT EXISTS ( SELECT 1 FROM members WHERE email = ? AND pwd = ?) AS exist';
-        db.query(sql,[email,pwd],(err,result)=>{
+        const sql = 'SELECT pwd, salt FROM members WHERE email = ?';
+        db.query(sql,[email],(err,result)=>{
             if(err){
                 console.log(err);
                 reject(err);
             }else{
-                console.log(result[0].exist);
-                resolve(result[0].exist);
+                const hashedPwd = crypto.pbkdf2Sync(pwd,result[0].salt,10000,10,'sha512').toString('base64');
+                if(result[0].pwd == hashedPwd){
+                    resolve(true);
+                }
+                else{
+                    resolve(false)
+                }
+                
             }
         })
     })

@@ -22,7 +22,7 @@ const join = async (req, res) => {
     }
     catch (err) {
         console.log(err);
-        res.status(400);
+        res.status(400).json({'message': '오류또났다..'});
     }
 }
 
