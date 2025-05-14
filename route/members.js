@@ -32,14 +32,19 @@ router
         body('email').notEmpty().withMessage('email 정보 누락'),
         body('pwd').notEmpty().withMessage('pwd 정보 누락'),
         validate
-    ],login)
+    ], login)
 
 router
     .route('/reset')
     .post([
         body('email').notEmpty().withMessage('email 정보 누락'),
         validate
-    ] ,passwordResetRequest)
-    .put(passwordReset)
+    ], passwordResetRequest)
+    .put([
+        body('email').notEmpty().withMessage('email 정보 누락'),
+        body('pwd').notEmpty().withMessage('pwd 정보 누락'),
+        validate
+    ],
+        passwordReset)
 
 module.exports = router;

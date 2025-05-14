@@ -2,6 +2,7 @@
 const memberModel = require('../models/momberModel');
 const { StatusCodes } = require('http-status-codes');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto'); // crypto 모듈 : 암호화
 
 
 const join = async (req, res) => {
@@ -48,28 +49,41 @@ const login = async (req, res) => {
     }
 }
 const passwordResetRequest = async (req, res) => {
-    const { email,pwd } = req.body;
+    const { email } = req.body;
     console.log('passwordResetRequest 호출됬음');
     try {
-        const isExist = memberModel.isExistByEmail(email);
+        const isExist = await memberModel.isExistByEmail(email);
         if(isExist){
-            res.status(StatusCodes.OK);
+            res.status(StatusCodes.OK).json({"message":"비밀번호 변경 승인 완료","email":email});
             return;
         }else{
-            res.status(StatusCodes.UNAUTHORIZED);
+            res.status(StatusCodes.UNAUTHORIZED).json({"message":"없는 이메일인데용?"});
             return;
         }
     }
     catch (err) {
-        res.status(500);
+        res.status(500).json({"message":"뭔가 고장났는데용?"});
+        return;
     }
 }
 const passwordReset = async (req, res) => {
     console.log('passwordReset 호출됬음');
-
+    const { email,pwd } = req.body;
     try {
+        const isExist = await memberModel.isExistByEmail(email);
+        if(isExist){
+            await memberModel.resetPassword(email,pwd);
+            res.status(StatusCodes.OK).json({"message":"비밀번호 변경 완료"});
+            return;
+        }
+        else{
+            res.status(StatusCodes.BAD_REQUEST).json({"message":"이메일 다시 확인해보세용"});
+            return;
+        }
     }
     catch (err) {
+        res.status(500).json({"message":"문제가 났어요 .."});
+        return;
     }
 }
 
