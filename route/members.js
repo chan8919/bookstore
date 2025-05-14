@@ -36,7 +36,10 @@ router
 
 router
     .route('/reset')
-    .post(passwordResetRequest)
+    .post([
+        body('email').notEmpty().withMessage('email 정보 누락'),
+        validate
+    ] ,passwordResetRequest)
     .put(passwordReset)
 
 module.exports = router;

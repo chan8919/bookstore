@@ -48,10 +48,20 @@ const login = async (req, res) => {
     }
 }
 const passwordResetRequest = async (req, res) => {
+    const { email,pwd } = req.body;
     console.log('passwordResetRequest 호출됬음');
     try {
+        const isExist = memberModel.isExistByEmail(email);
+        if(isExist){
+            res.status(StatusCodes.OK);
+            return;
+        }else{
+            res.status(StatusCodes.UNAUTHORIZED);
+            return;
+        }
     }
     catch (err) {
+        res.status(500);
     }
 }
 const passwordReset = async (req, res) => {
