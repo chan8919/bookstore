@@ -1,8 +1,8 @@
-
-const memberModel = require('../models/momberModel');
+const memberModel = require('../models/memberModel');
 const { StatusCodes } = require('http-status-codes');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto'); // crypto 모듈 : 암호화
+require('dotenv').config();
 
 
 const join = async (req, res) => {
@@ -33,7 +33,7 @@ const login = async (req, res) => {
         const isMatched = await memberModel.isPasswordMatched(email,pwd);
         console.log(isMatched);
         if(isMatched){
-            const token = jwt.sign({email:email},process.env.JWT_PRIVATE_KET,{expiresIn:'15m',issuer:"sori"});
+            const token = jwt.sign({email:email},process.env.JWT_PRIVATE_KEY,{expiresIn:'15m',issuer:"sori"});
             res.cookie("jwt",token,{httpOnly:true});
             res.status(StatusCodes.CREATED).json({"massage":"인증 성공 및 JWT 발급 완료."});
             return;

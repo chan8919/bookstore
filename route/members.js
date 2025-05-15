@@ -1,10 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
-const memberModel = require('../models/momberModel');
 const { StatusCodes } = require('http-status-codes');
-const { join, login, passwordReset, passwordResetRequest } = require('../controller/memberController');
-
+const { join,login,resetPassword,resetRequestPassword } = require('../controller/memberController');
 router.use(express.json());
 
 function validate(req, res, next) {
@@ -39,12 +37,12 @@ router
     .post([
         body('email').notEmpty().withMessage('email 정보 누락'),
         validate
-    ], passwordResetRequest)
+    ], resetRequestPassword)
     .put([
         body('email').notEmpty().withMessage('email 정보 누락'),
         body('pwd').notEmpty().withMessage('pwd 정보 누락'),
         validate
     ],
-        passwordReset)
+        resetPassword)
 
 module.exports = router;
