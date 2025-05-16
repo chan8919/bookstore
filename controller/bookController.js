@@ -6,8 +6,8 @@ require('dotenv').config();
 const getBooks = async (req, res) => {
     console.log('getBooks 컨트롤러 호출');
     try {
-        const {category_id} = req.query;
-        const books = await bookModel.getBooks(category_id);
+        const {category_id, news,limit,page } = req.query;
+        const books = await bookModel.getBooks({category_id:category_id,news:news,limit:limit,page:page});
         res.status(StatusCodes.OK).json(books);
 
     }
