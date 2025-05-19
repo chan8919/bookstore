@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
-const { StatusCodes } = require('http-status-codes');
 const { join,login,resetPassword,resetRequestPassword } = require('../controller/memberController');
 router.use(express.json());
 

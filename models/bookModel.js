@@ -5,8 +5,9 @@ function getBooks({ category_id, news ,limit, page}) {
         let sql, values;
         console.log(category_id);
         console.log(category_id == undefined);
-        
-        sql = `SELECT b.*,c.name AS category_name FROM books AS b 
+        console.log("here2 : " + news);
+        const likeCountQuery = '(SELECT COUNT(*) FROM likes WHERE likes.book_id = b.id)';
+        sql = `SELECT b.*,c.name AS category_name, ${likeCountQuery} AS likes FROM books AS b 
             LEFT JOIN categoris As c ON b.category_id = c.id`;
         values = [];
 
@@ -17,7 +18,8 @@ function getBooks({ category_id, news ,limit, page}) {
         else if (category_id) {
             sql = sql + ' WHERE b.category_id = ? ';
             values.push(category_id);
-        } else if (news) {
+        } else if (news==='true') {
+            console.log("not here");
             sql += ' WHERE b.pub_date BETWEEN DATE_SUB(DATE(NOW()), INTERVAL 1 MONTH) AND DATE(NOW())';
         }
 
@@ -48,8 +50,10 @@ function getBooks({ category_id, news ,limit, page}) {
 
 function getBookDetialById(id) {
     return new Promise((resolve, reject) => {
-        const sql = 'SELECT b.*,c.name AS category_name FROM books AS b LEFT JOIN categoris As c ON b.category_id = c.id WHERE b.id=?';
-        db.query(sql, id, (err, result, fields) => {
+        const likeCountQuery = '(SELECT COUNT(*) FROM likes WHERE likes.book_id = b.id)';
+        const sql = `SELECT b.*,c.name AS category_name, ${likeCountQuery} AS likes FROM books AS b LEFT JOIN categoris As c ON b.category_id = c.id WHERE b.id=?`;
+        const value = [id];
+        db.query(sql, value, (err, result, fields) => {
             if (err) {
                 console.log(err);
                 reject(err);
