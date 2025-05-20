@@ -1,19 +1,19 @@
 
 const bookModel = require('../models/bookModel');
 const { StatusCodes } = require('http-status-codes');
+const { matchedData } = require('express-validator');
 require('dotenv').config();
 
 const getBooks = async (req, res) => {
     console.log('getBooks 컨트롤러 호출');
+    const inputData = matchedData(req, { locations: ['body', 'params', 'query'] });
     try {
-        const {category_id, news,limit,page } = req.query;
-        console.log("here1 : " + news);
-        console.log("param: " + typeof(category_id));
-        console.log("param: " + typeof(news));
-        console.log("param: " + typeof(limit));
-        console.log("param: " + typeof(page));
-
-        const books = await bookModel.getBooks({category_id:category_id,news:news,limit:limit,page:page});
+        const books = await bookModel.getBooks({
+            category_id:inputData.category_id,
+            news:inputData.news,
+            limit:inputData.limit,
+            page:inputData.page
+        });
         res.status(StatusCodes.OK).json(books);
     }
     catch(err){
@@ -23,11 +23,10 @@ const getBooks = async (req, res) => {
 }
 const getBookDetial = async (req, res) => {
     console.log('getBookDetial 컨트롤러 호출');
-    let {id} = req.params;
-    const intid = parseInt(id);
+    const inputData = matchedData(req, { locations: ['body', 'params', 'query'] });
 
     try {
-        const book = await bookModel.getBookDetialById(intid);
+        const book = await bookModel.getBookDetialById(inputData.id);
         res.status(StatusCodes.OK).json(book);
     }
     catch(err){

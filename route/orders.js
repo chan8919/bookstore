@@ -1,9 +1,17 @@
 const express = require('express');
 const router = express.Router();
 
-router.use(express.json());
-
-
+//router.use(express.json());
+function validate(req, res, next) {
+    const validatorErr = validationResult(req);
+   
+    if (!validatorErr.isEmpty()) {
+        console.log(validatorErr.array());
+        res.status(400).json({ 'message': validatorErr.array() });
+        return;
+    }
+    next();
+}
 
 router
     .route('/')

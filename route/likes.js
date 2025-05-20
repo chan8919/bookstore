@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { param,body, validationResult } = require('express-validator');
 const { setlike } = require('../controller/likeController');
-router.use(express.json());
+//router.use(express.json());
 
 function validate(req, res, next) {
     const validatorErr = validationResult(req);
@@ -17,10 +17,11 @@ function validate(req, res, next) {
 router
     .route('/:book_id')
     .put([
-        body('member_id').notEmpty().withMessage('emai 정보 누락'),
-        param('book_id').notEmpty().isInt().withMessage('book id정보 이상'),
+        body('member_id').notEmpty().isInt().withMessage('member_id 누락').toInt(),
+        param('book_id').notEmpty().isInt().withMessage('book id정보 이상').toInt(),
         validate
-    ],setlike
+    ],
+    setlike
 )
     
 module.exports = router;

@@ -7,6 +7,7 @@ const cartItemRouter = require('./route/cartitems');
 const likeRouter = require('./route/likes');
 const orderRouter = require('./route/orders');
 dotenv.config();
+app.use(express.json());
 
 
 app.listen(process.env.PORT);

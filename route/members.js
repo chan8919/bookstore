@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { join,login,resetPassword,resetRequestPassword } = require('../controller/memberController');
-router.use(express.json());
+//router.use(express.json());
 
 function validate(req, res, next) {
     const validatorErr = validationResult(req);
@@ -17,7 +17,7 @@ function validate(req, res, next) {
 router
     .route('/join')
     .post([
-        body('email').notEmpty().withMessage('email 정보 누락'),
+        body('email').notEmpty().isEmail().withMessage('email 정보 누락'),
         body('pwd').notEmpty().withMessage('pwd 정보 누락'),
         body('name').notEmpty().withMessage('name 정보 누락'),
         validate
@@ -26,7 +26,7 @@ router
 router
     .route('/login')
     .post([
-        body('email').notEmpty().withMessage('email 정보 누락'),
+        body('email').notEmpty().isEmail().withMessage('email 정보 누락'),
         body('pwd').notEmpty().withMessage('pwd 정보 누락'),
         validate
     ], login)
@@ -34,7 +34,7 @@ router
 router
     .route('/reset')
     .post([
-        body('email').notEmpty().withMessage('email 정보 누락'),
+        body('email').notEmpty().isEmail().withMessage('email 정보 누락'),
         validate
     ], resetRequestPassword)
     .put([

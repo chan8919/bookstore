@@ -3,28 +3,31 @@ const db = require('../database/mariadb');
 function getBooks({ category_id, news ,limit, page}) {
     return new Promise((resolve, reject) => {
         let sql, values;
-        console.log(category_id);
-        console.log(category_id == undefined);
-        console.log("here2 : " + news);
+
         const likeCountQuery = '(SELECT COUNT(*) FROM likes WHERE likes.book_id = b.id)';
         sql = `SELECT b.*,c.name AS category_name, ${likeCountQuery} AS likes FROM books AS b 
             LEFT JOIN categoris As c ON b.category_id = c.id`;
-        values = [];
 
+        values = [];
+        
+        //옵션에 따른 SQL 조정
+        console.log("sss : "+ (category_id && news));
         if (category_id && news) {
             sql += ' WHERE b.category_id = ? AND b.pub_date BETWEEN DATE_SUB(DATE(NOW()), INTERVAL 1 MONTH) AND DATE(NOW())';
+            console.log('1 : '+sql);
             values.push(category_id);
         }
         else if (category_id) {
             sql = sql + ' WHERE b.category_id = ? ';
+            console.log('2 : '+sql);
             values.push(category_id);
-        } else if (news==='true') {
+        } else if (news) {
             console.log("not here");
             sql += ' WHERE b.pub_date BETWEEN DATE_SUB(DATE(NOW()), INTERVAL 1 MONTH) AND DATE(NOW())';
+            console.log('3 : '+sql);
         }
 
         //페이징 추가
-
         if(limit){
             sql += ' LIMIT ? OFFSET ?';
             let offset = 0;
@@ -33,7 +36,6 @@ function getBooks({ category_id, news ,limit, page}) {
             }
             values.push(parseInt(limit),offset);
         }
-
         console.log(sql);
         db.query(sql, values, (err, result, fields) => {
             if (err) {
@@ -41,7 +43,6 @@ function getBooks({ category_id, news ,limit, page}) {
                 reject(err);
             }
             else {
-                console.log(result);
                 resolve(result);
             }
         })
