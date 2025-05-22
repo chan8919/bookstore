@@ -12,13 +12,13 @@ const addToCart = async (req, res) => {
         //장바구니에 이미 있는 항목인지 확인
         let cartItem = await cartItemModel.getCartItem(inputData['member_id'], inputData['book_id']);
         if (cartItem) {
-            // 기존 항목에 amount 만큼 추가
-            const targetAmount = inputData['amount'] + cartItem.amount;
-            await cartItemModel.UpdateAmountOfCartItemById(cartItem.id, targetAmount);
+            // 기존 항목에 quantity 만큼 추가
+            const targetQuantity = inputData['quantity'] + cartItem.quantity;
+            await cartItemModel.UpdateQuantityOfCartItemById(cartItem.id, targetQuantity);
             res.status(StatusCodes.OK).json({ "message": "이미 항목이 존재합니다. 주문하신 수량만큼 추가되었습니다" });
             return;
         } else {
-            await cartItemModel.addCartItems(inputData['member_id'], inputData['book_id'], inputData['amount']);
+            await cartItemModel.addCartItems(inputData['member_id'], inputData['book_id'], inputData['quantity']);
             res.status(StatusCodes.CREATED).json({ "message": "장바구니에 항목이 추가되었습니다" });
             return;
         }

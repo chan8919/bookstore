@@ -23,7 +23,7 @@ router
     .post([
         body('member_id').isInt().notEmpty().withMessage('member_id의 값이 잘못되었습니다.').toInt(),
         body('book_id').isInt().notEmpty().withMessage('book_id의 값이 잘못되었습니다.').toInt(),
-        body('amount').isInt().notEmpty().withMessage('amount의 값이 잘못되었습니다.').toInt(), validate
+        body('quantity').isInt().notEmpty().withMessage('quantity의 값이 잘못되었습니다.').toInt(), validate
     ],
         addToCart)
 

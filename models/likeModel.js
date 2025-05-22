@@ -1,84 +1,83 @@
 const db = require('../database/mariadb');
 
 
-function addLike(memberId,bookId) {
-    return new Promise((resolve, reject) => {
-        const sql = 'INSERT INTO likes (member_id,book_id) VALUES (?,?)';
-        value = [memberId,bookId];
-        console.log(value);
-        db.query(sql, value, (err, result, fields) => {
-            if (err) {
-                console.log(err);
-                reject(err);
-            }
-            else {
-                resolve(result);
-            }
-        })
-    })
+async function addLike(memberId, bookId) {
+
+    const sql = 'INSERT INTO likes (member_id,book_id) VALUES (?,?)';
+    values = [memberId, bookId];
+    console.log(values);
+    try {
+        const [rows, fields] = await db.execute(sql, values);
+        return rows;
+    }
+    catch (err) {
+        console.error(err);
+        throw err;
+
+    }
+
 }
-function deleteLike(memberId,bookId) {
-    return new Promise((resolve, reject) => {
-        const sql = 'DELETE FROM likes WHERE member_id=? AND book_id=?';
-        value = [parseInt(memberId),parseInt(bookId)];
-        db.query(sql, value, (err, result, fields) => {
-            if (err) {
-                console.log(err);
-                reject(err);
-            }
-            else {
-                resolve(result);
-            }
-        })
-    })
+async function deleteLike(memberId, bookId) {
+
+    const sql = 'DELETE FROM likes WHERE member_id=? AND book_id=?';
+    values = [parseInt(memberId), parseInt(bookId)];
+    try {
+        const [rows, fields] = await db.execute(sql, values);
+        return rows;
+    }
+    catch (err) {
+        console.error(err);
+        throw err;
+
+    }
+
 }
 
-function hasMemberLikedBook(memberId,bookId){
-    return new Promise((resolve, reject) => {
-        const sql = 'SELECT * FROM likes WHERE member_id=? AND book_id=?';
-        value = [parseInt(memberId),parseInt(bookId)];
-        db.query(sql, value, (err, result, fields) => {
-            if (err) {
-                console.log(err);
-                reject(err);
-            }
-            else {
-                resolve(result.length);
-            }
-        })
-    })
+async function hasMemberLikedBook(memberId, bookId) {
+
+    const sql = 'SELECT 1 FROM likes WHERE member_id=? AND book_id=?';
+    values = [parseInt(memberId), parseInt(bookId)];
+    try {
+        const [rows, fields] = await db.execute(sql, values);
+        return rows.length;
+    }
+    catch (err) {
+        console.error(err);
+        throw err;
+
+    }
+
 }
 
-function countLikesForbook(bookId){
-    return new Promise((resolve, reject) => {
-        const sql = 'SELECT COUNT(*) FROM likes WHERE book_id = ?';
-        value = [parseInt(bookId)];
-        db.query(sql, value, (err, result, fields) => {
-            if (err) {
-                console.log(err);
-                reject(err);
-            }
-            else {
-                resolve(result[0]);
-            }
-        })
-    })
+async function countLikesForbook(bookId) {
+
+    const sql = 'SELECT COUNT(*) FROM likes WHERE book_id = ?';
+    values = [parseInt(bookId)];
+    try {
+        const [rows, fields] = await db.execute(sql, values);
+        return rows[0];
+    }
+    catch (err) {
+        console.error(err);
+        throw err;
+
+    }
+
 }
 
-function getLikesForbook(bookId){
-    return new Promise((resolve, reject) => {
-        const sql = 'SELECT * FROM likes WHERE book_id = ?';
-        value = [parseInt(bookId)];
-        db.query(sql, value, (err, result, fields) => {
-            if (err) {
-                console.log(err);
-                reject(err);
-            }
-            else {
-                resolve(result[0]);
-            }
-        })
-    })
+async function getLikesForbook(bookId) {
+
+    const sql = 'SELECT * FROM likes WHERE book_id = ?';
+    values = [parseInt(bookId)];
+    try {
+        const [rows, fields] = await db.execute(sql, values);
+        return rows[0];
+    }
+    catch (err) {
+        console.error(err);
+        throw err;
+
+    }
 }
 
 module.exports = {

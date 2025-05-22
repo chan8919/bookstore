@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
 
-//router.use(express.json());
+
+const orderController = require('../controller/orderController');
+const { param, query, body, validationResult, matchedData } = require('express-validator');
+
 function validate(req, res, next) {
     const validatorErr = validationResult(req);
-   
+
     if (!validatorErr.isEmpty()) {
         console.log(validatorErr.array());
         res.status(400).json({ 'message': validatorErr.array() });
@@ -15,13 +18,22 @@ function validate(req, res, next) {
 
 router
     .route('/')
-    .post((req,res)=>{
-        res.json('주문');
-
-    })
+    .post([
+        body('items').isArray().notEmpty().withMessage('items의 값이 잘못되었습니다'),
+        body('items.*.cartItem_id').isInt().notEmpty().withMessage('items의 cartItem_id값이 잘못되었습니다').toInt(),
+        body('items.*.book_id').isInt().notEmpty().withMessage('items의 book_id값이 잘못되었습니다').toInt(),
+        body('items.*.quantity').isInt().notEmpty().withMessage('items의 quantity값이 잘못되었습니다').toInt(),
+        body('delivery').notEmpty().withMessage('delivery의의 값이 잘못되었습니다'),
+        body('delivery.*.address').isString().notEmpty().withMessage('delivery의 address값이 잘못되었습니다'),
+        body('delivery.*.receiver').isString().notEmpty().withMessage('delivery의 receiver값이 잘못되었습니다'),
+        body('delivery.*.contact').isString().notEmpty().withMessage('delivery의 contact값이 잘못되었습니다'),
+        body('total_price').isInt().notEmpty().withMessage('total_price의의 값이 잘못되었습니다').optional(),
+        validate
+    ],orderController.orderItems)
     .get((req,res)=>{
         res.json('주문목록');
 
+    
     })
 
 router
