@@ -4,11 +4,11 @@ require('dotenv').config();
 
 // model 은 class로 빼는게 좋을까? 궂이? 라는 생각이 든다. 오히려 오버헤드가 생겨버린다고 본다.
 /** 동일한 email을 가진 Member가 있는지 확인. 있을경우 return true, 없으면 false */
-async function isExistByEmail(email) {
+async function isExistByEmail(conn,email) {
     const sql = 'SELECT EXISTS (SELECT * FROM members WHERE email = ?) AS exist';
 
     try {
-        const [rows, fields] = await db.execute(sql, email);
+        const [rows, fields] = await conn.execute(sql, email);
         return rows.exist;
     }
     catch (err) {
@@ -20,7 +20,7 @@ async function isExistByEmail(email) {
 
 }
 /** member를 추가합니다.추가에 필요한 member로 email, name, pwd 를 가진 객체가 필요합니다. */
-async function addMember(member) {
+async function addMember(conn,member) {
 
     const sql = 'INSERT INTO members (email,name,pwd,salt)  VALUES ( ?,?,?,?)';
 
@@ -30,7 +30,7 @@ async function addMember(member) {
     const values = [member['email'], member['name'], hashedPwd, salt];
 
     try {
-        const [rows, fields] = await db.execute(sql, values);
+        const [rows, fields] = await conn.execute(sql, values);
         return rows;
     }
     catch (err) {
@@ -42,13 +42,13 @@ async function addMember(member) {
 }
 
 /** member의 email, pwd가 매치하는지 여부를 확인합니다. email에 대한 pwd가 일치할 경우 true값을 리턴합니다*/
-async function isPasswordMatched(email, pwd) {
+async function isPasswordMatched(conn,email, pwd) {
 
     const sql = 'SELECT pwd, salt FROM members WHERE email = ?';
     const values = [email];
 
     try {
-        const [rows, fields] = await db.execute(sql, values);
+        const [rows, fields] = await conn.execute(sql, values);
         const hashedPwd = crypto.pbkdf2Sync(pwd, result[0].salt, 10000, 10, 'sha512').toString('base64');
         if (rows[0].pwd == hashedPwd) {
                 return(true);
@@ -65,7 +65,7 @@ async function isPasswordMatched(email, pwd) {
 
 }
 /** member의 pwd를 변경한다. email과 pwd가 필요함. */
-async function resetPassword(email, pwd) {
+async function resetPassword(conn,email, pwd) {
 
     const sql = 'UPDATE members SET pwd = ?, salt = ? WHERE email = ?';
 
@@ -81,7 +81,7 @@ async function resetPassword(email, pwd) {
     //     }
     // })
     try {
-        const [rows, fields] = await db.execute(sql, values);
+        const [rows, fields] = await conn.execute(sql, values);
         return rows;
     }
     catch (err) {

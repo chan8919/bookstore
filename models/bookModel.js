@@ -1,6 +1,6 @@
 const db = require('../database/mariadb');
 
-async function getBooks({ category_id, news, limit, page }) {
+async function getBooks(conn,{ category_id, news, limit, page }) {
     // return new Promise((resolve, reject) => {
     let sql, values;
 
@@ -38,7 +38,7 @@ async function getBooks({ category_id, news, limit, page }) {
     }
     console.log(sql);
     try {
-        const [rows, fields] = await db.execute(sql, values);
+        const [rows, fields] = await conn.execute(sql, values);
         return rows;
     }
     catch (err) {
@@ -59,13 +59,13 @@ async function getBooks({ category_id, news, limit, page }) {
     //})
 }
 
-async function getBookDetialById(id) {
+async function getBookDetialById(conn,id) {
 
     const likeCountQuery = '(SELECT COUNT(*) FROM likes WHERE likes.book_id = b.id)';
     const sql = `SELECT b.*,c.name AS category_name, ${likeCountQuery} AS likes FROM books AS b LEFT JOIN categoris As c ON b.category_id = c.id WHERE b.id=?`;
     const values = [id];
     try {
-        const [rows, fields] = await db.execute(sql, values);
+        const [rows, fields] = await conn.execute(sql, values);
         return rows[0];
     }
     catch (err) {
@@ -75,11 +75,11 @@ async function getBookDetialById(id) {
     }
 
 }
-async function getAllCategory() {
+async function getAllCategory(conn) {
 
         const sql = 'SELECT * FROM categoris';
         try {
-            const [rows,fields] = await db.execute(sql);
+            const [rows,fields] = await conn.execute(sql);
             return rows;
         }
         catch(err){

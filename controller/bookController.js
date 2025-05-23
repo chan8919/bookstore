@@ -2,13 +2,18 @@
 const bookModel = require('../models/bookModel');
 const { StatusCodes } = require('http-status-codes');
 const { matchedData } = require('express-validator');
+const dbPool = require('../database/mariadb');
 require('dotenv').config();
 
 const getBooks = async (req, res) => {
     console.log('getBooks 컨트롤러 호출');
     const inputData = matchedData(req, { locations: ['body', 'params', 'query'] });
+    let conn;
     try {
-        const books = await bookModel.getBooks({
+        // DB 커넥션 생성성
+        conn = await dbPool.getConnection();
+
+        const books = await bookModel.getBooks(conn,{
             category_id:inputData.category_id,
             news:inputData.news,
             limit:inputData.limit,
@@ -25,8 +30,12 @@ const getBookDetial = async (req, res) => {
     console.log('getBookDetial 컨트롤러 호출');
     const inputData = matchedData(req, { locations: ['body', 'params', 'query'] });
 
+    let conn;
     try {
-        const book = await bookModel.getBookDetialById(inputData.id);
+        // DB 커넥션 생성성
+        conn = await dbPool.getConnection();
+
+        const book = await bookModel.getBookDetialById(conn,inputData.id);
         res.status(StatusCodes.OK).json(book);
     }
     catch(err){
@@ -36,8 +45,12 @@ const getBookDetial = async (req, res) => {
 }
 const getAllCategory = async (req, res) => {
     console.log('getAllCategory 컨트롤러 호출');
+    let conn;
     try {
-        const categories = await bookModel.getAllCategory();
+        // DB 커넥션 생성성
+        conn = await dbPool.getConnection();
+        
+        const categories = await bookModel.getAllCategory(conn);
         res.status(StatusCodes.OK).json(categories);
     }
     catch(err){

@@ -1,7 +1,7 @@
 const db = require('../database/mariadb');
 
 
-async function addLike(memberId, bookId) {
+async function addLike(conn,memberId, bookId) {
 
     const sql = 'INSERT INTO likes (member_id,book_id) VALUES (?,?)';
     values = [memberId, bookId];
@@ -17,7 +17,7 @@ async function addLike(memberId, bookId) {
     }
 
 }
-async function deleteLike(memberId, bookId) {
+async function deleteLike(conn,memberId, bookId) {
 
     const sql = 'DELETE FROM likes WHERE member_id=? AND book_id=?';
     values = [parseInt(memberId), parseInt(bookId)];
@@ -33,7 +33,7 @@ async function deleteLike(memberId, bookId) {
 
 }
 
-async function hasMemberLikedBook(memberId, bookId) {
+async function hasMemberLikedBook(conn,memberId, bookId) {
 
     const sql = 'SELECT 1 FROM likes WHERE member_id=? AND book_id=?';
     values = [parseInt(memberId), parseInt(bookId)];
@@ -49,7 +49,7 @@ async function hasMemberLikedBook(memberId, bookId) {
 
 }
 
-async function countLikesForbook(bookId) {
+async function countLikesForbook(conn,bookId) {
 
     const sql = 'SELECT COUNT(*) FROM likes WHERE book_id = ?';
     values = [parseInt(bookId)];
@@ -65,7 +65,7 @@ async function countLikesForbook(bookId) {
 
 }
 
-async function getLikesForbook(bookId) {
+async function getLikesForbook(conn,bookId) {
 
     const sql = 'SELECT * FROM likes WHERE book_id = ?';
     values = [parseInt(bookId)];

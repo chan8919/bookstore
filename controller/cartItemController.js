@@ -2,23 +2,27 @@
 const cartItemModel = require('../models/cartItemModel');
 const { StatusCodes } = require('http-status-codes');
 const { matchedData } = require('express-validator');
+const dbPool = require('../database/mariadb');
 require('dotenv').config();
 
 //장바구니 담기기
 const addToCart = async (req, res) => {
     console.log('addToCart 컨트롤러 호출');
     const inputData = matchedData(req, { locations: ['body', 'params', 'query'] });
+    let conn;
     try {
+        // DB 커넥션 생성성
+        conn = await dbPool.getConnection();
         //장바구니에 이미 있는 항목인지 확인
-        let cartItem = await cartItemModel.getCartItem(inputData['member_id'], inputData['book_id']);
+        let cartItem = await cartItemModel.getCartItem(conn, inputData['member_id'], inputData['book_id']);
         if (cartItem) {
             // 기존 항목에 quantity 만큼 추가
             const targetQuantity = inputData['quantity'] + cartItem.quantity;
-            await cartItemModel.UpdateQuantityOfCartItemById(cartItem.id, targetQuantity);
+            await cartItemModel.UpdateQuantityOfCartItemById(conn, cartItem.id, targetQuantity);
             res.status(StatusCodes.OK).json({ "message": "이미 항목이 존재합니다. 주문하신 수량만큼 추가되었습니다" });
             return;
         } else {
-            await cartItemModel.addCartItems(inputData['member_id'], inputData['book_id'], inputData['quantity']);
+            await cartItemModel.addCartItems(conn, inputData['member_id'], inputData['book_id'], inputData['quantity']);
             res.status(StatusCodes.CREATED).json({ "message": "장바구니에 항목이 추가되었습니다" });
             return;
         }
@@ -34,8 +38,11 @@ const addToCart = async (req, res) => {
 
 const getCartItemList = async (req, res) => {
     const inputData = matchedData(req, { locations: ['body', 'params', 'query'] });
+    let conn;
     try {
-        const items = await cartItemModel.getCartItemsByMemberId(inputData['member_id']);
+        // DB 커넥션 생성성
+        conn = await dbPool.getConnection();
+        const items = await cartItemModel.getCartItemsByMemberId(conn, inputData['member_id']);
         console.log(items);
         res.status(StatusCodes.OK).json({ "message": "사용자의 장바구니 목록입니다", "books": items });
     }
@@ -48,15 +55,18 @@ const getCartItemList = async (req, res) => {
 
 const deleteCartItem = async (req, res) => {
     const inputData = matchedData(req, { locations: ['body', 'params', 'query'] });
+    let conn;
     try {
-        const itemExist = await cartItemModel.hasCartItemById(inputData['cartItemId']);
+        // DB 커넥션 생성성
+        conn = await dbPool.getConnection();
+        const itemExist = await cartItemModel.hasCartItemById(conn, inputData['cartItemId']);
         if (itemExist) {
-            await cartItemModel.deleteCartItemById(inputData['cartItemId']);
+            await cartItemModel.deleteCartItemById(conn, inputData['cartItemId']);
             res.status(StatusCodes.OK).json({ "message": "항목 삭제 완료" });
             return;
         }
         else {
-            res.status(StatusCodes.NOT_FOUND).json({ "message": "항목이 존재하지 않습니다 "});
+            res.status(StatusCodes.NOT_FOUND).json({ "message": "항목이 존재하지 않습니다 " });
             return;
         }
 
@@ -71,17 +81,20 @@ const deleteCartItem = async (req, res) => {
 
 const getItemListByIdArray = async (req, res) => {
     const inputData = matchedData(req, { locations: ['body', 'params', 'query'] });
+    let conn;
     try {
+        // DB 커넥션 생성성
+        conn = await dbPool.getConnection();
         // 다수의 id를 가지고 값 가져오기
         let idList = [];
         idList = inputData['cartItemIdList'];
         if (idList.length) {
-            itemList = await cartItemModel.getCartItemsByIds(idList);
-            res.status(StatusCodes.OK).json({ "message": "주문 예정 목록입니다 ","bookList":itemList});
+            itemList = await cartItemModel.getCartItemsByIds(conn, idList);
+            res.status(StatusCodes.OK).json({ "message": "주문 예정 목록입니다 ", "bookList": itemList });
             return;
         }
         else {
-            res.status(StatusCodes.NOT_FOUND).json({ "message": "항목이 존재하지 않습니다 "});
+            res.status(StatusCodes.NOT_FOUND).json({ "message": "항목이 존재하지 않습니다 " });
             return;
         }
 
@@ -95,4 +108,4 @@ const getItemListByIdArray = async (req, res) => {
 }
 
 //장바구니 도서 삭제
-module.exports = { addToCart, getCartItemList,deleteCartItem,getItemListByIdArray };
+module.exports = { addToCart, getCartItemList, deleteCartItem, getItemListByIdArray };
