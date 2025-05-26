@@ -6,10 +6,11 @@ require('dotenv').config();
 /** 동일한 email을 가진 Member가 있는지 확인. 있을경우 return true, 없으면 false */
 async function isExistByEmail(conn,email) {
     const sql = 'SELECT EXISTS (SELECT * FROM members WHERE email = ?) AS exist';
-
+    
     try {
-        const [rows, fields] = await conn.execute(sql, email);
-        return rows.exist;
+        const [rows, fields] = await conn.execute(sql, [email]);
+        console.log();
+        return rows[0].exist;
     }
     catch (err) {
         console.error(err);
@@ -41,20 +42,21 @@ async function addMember(conn,member) {
 
 }
 
-/** member의 email, pwd가 매치하는지 여부를 확인합니다. email에 대한 pwd가 일치할 경우 true값을 리턴합니다*/
+/** member의 email, pwd가 매치하는지 여부를 확인합니다. email에 대한 pwd가 일치할 경우 유저의 id값을 리턴합니다.*/
 async function isPasswordMatched(conn,email, pwd) {
 
-    const sql = 'SELECT pwd, salt FROM members WHERE email = ?';
+    const sql = 'SELECT id, pwd, salt FROM members WHERE email = ?';
     const values = [email];
 
     try {
         const [rows, fields] = await conn.execute(sql, values);
-        const hashedPwd = crypto.pbkdf2Sync(pwd, result[0].salt, 10000, 10, 'sha512').toString('base64');
+        const hashedPwd = crypto.pbkdf2Sync(pwd, rows[0].salt, 10000, 10, 'sha512').toString('base64');
         if (rows[0].pwd == hashedPwd) {
-                return(true);
+            console.log(rows[0]);
+                return(rows[0].id);
             }
             else {
-                return(false)
+                return(null);
             }
     }
     catch (err) {
@@ -71,6 +73,7 @@ async function resetPassword(conn,email, pwd) {
 
     const salt = crypto.randomBytes(10).toString('base64');
     const hashedPwd = crypto.pbkdf2Sync(pwd, salt, 10000, 10, 'sha512').toString('base64');
+    console.log(hashedPwd+ salt+ email);
     const values = [hashedPwd, salt, email]
     // db.query(sql, [hashedPwd, salt, email], (err, result) => {
     //     if (err) {

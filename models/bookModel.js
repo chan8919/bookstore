@@ -3,7 +3,7 @@ const db = require('../database/mariadb');
 async function getBooks(conn,{ category_id, news, limit, page }) {
     // return new Promise((resolve, reject) => {
     let sql, values;
-
+    console.log("--model-getBook 호출");
     const likeCountQuery = '(SELECT COUNT(*) FROM likes WHERE likes.book_id = b.id)';
     sql = `SELECT b.*,c.name AS category_name, ${likeCountQuery} AS likes FROM books AS b 
             LEFT JOIN categoris As c ON b.category_id = c.id`;

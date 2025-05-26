@@ -25,6 +25,10 @@ const getBooks = async (req, res) => {
         console.log(err);
         res.status(StatusCodes.BAD_REQUEST).json("err");
     }
+    finally{
+        if(conn) conn.release();
+        return;
+    }
 }
 const getBookDetial = async (req, res) => {
     console.log('getBookDetial 컨트롤러 호출');
@@ -42,6 +46,10 @@ const getBookDetial = async (req, res) => {
         console.log(err);
         res.status(StatusCodes.BAD_REQUEST).json("err");
     }
+    finally{
+        if(conn) conn.release();
+        return;
+    }
 }
 const getAllCategory = async (req, res) => {
     console.log('getAllCategory 컨트롤러 호출');
@@ -56,6 +64,10 @@ const getAllCategory = async (req, res) => {
     catch(err){
         console.log(err);
         res.status(StatusCodes.BAD_REQUEST).json("err");
+    }
+    finally{
+        if(conn) conn.release();
+        return;
     }
 }
 

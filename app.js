@@ -8,6 +8,11 @@ const likeRouter = require('./route/likes');
 const orderRouter = require('./route/orders');
 dotenv.config();
 app.use(express.json());
+// 프론트엔드 서버에서 접근하기 위한 설정정
+const cors = require('cors');
+app.use(cors({
+  origin: 'http://localhost:3000'
+}));
 
 
 app.listen(process.env.PORT);

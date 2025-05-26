@@ -4,6 +4,7 @@ const { matchedData } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const dbPool = require('../database/mariadb');
 const crypto = require('crypto'); // crypto 모듈 : 암호화
+const authUtil = require('../utiles/authenticationUtils');
 require('dotenv').config();
 
 
@@ -42,9 +43,9 @@ const login = async (req, res) => {
         conn = await dbPool.getConnection();
 
         const isMatched = await memberModel.isPasswordMatched(conn, inputData.email, inputData.pwd);
-        console.log(isMatched);
+        console.log("gere" + isMatched);
         if (isMatched) {
-            const token = jwt.sign({ email: inputData.email }, process.env.JWT_PRIVATE_KEY, { expiresIn: '15m', issuer: "sori" });
+            const token = jwt.sign({ id: isMatched }, process.env.JWT_PRIVATE_KEY, { expiresIn: '15m', issuer: "sori" });
             res.cookie("jwt", token, { httpOnly: true });
             res.status(StatusCodes.CREATED).json({ "massage": "인증 성공 및 JWT 발급 완료." });
             return;
