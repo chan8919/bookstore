@@ -1,10 +1,11 @@
 const db = require('../database/mariadb');
+const stringUtil = require('../utiles/stringUtils');
 
 // 
-async function addOrder(conn,member_id, delivery_id, total_price) {
+async function addOrder(conn,memberId, deliveryId, totalPrice) {
 
     const sql = 'INSERT INTO orders (member_id,delivery_id,total_price) VALUES (?,?,?)';
-    const values = [member_id, delivery_id, total_price];
+    const values = [memberId, deliveryId, totalPrice];
     console.log(values);
     try {
         const [rows, fields] = await conn.execute(sql, values);
@@ -58,14 +59,14 @@ async function addOrderItems(conn,orderitemlist) {
 
 }
 
-async function calculateTotalPriceByIds(conn,cartItemids) {
+async function calculateTotalPriceByIds(conn,cartItemIds) {
 
-    const placeholders = cartItemids.map(()=>'?').join(',');
+    const placeholders = cartItemIds.map(()=>'?').join(',');
     const sql = `SELECT SUM(b.price*cart.quantity) AS total_price 
     FROM (SELECT * FROM cartItems WHERE id IN (${placeholders})) AS cart 
     JOIN books as b 
     ON cart.book_id = b.id`;
-    const values = [...cartItemids];
+    const values = [...cartItemIds];
     console.log(values);
     try {
         const [rows, fields] = await conn.execute(sql, values);

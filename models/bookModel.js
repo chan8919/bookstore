@@ -1,30 +1,26 @@
 const db = require('../database/mariadb');
+const stringUtil = require('../utiles/stringUtils');
 
-async function getBooks(conn,{ category_id, news, limit, page }) {
-    // return new Promise((resolve, reject) => {
-    let sql, values;
+async function getBooks(conn, { categoryId, news, limit, page }) {
     console.log("--model-getBook 호출");
-    const likeCountQuery = '(SELECT COUNT(*) FROM likes WHERE likes.book_id = b.id)';
-    sql = `SELECT b.*,c.name AS category_name, ${likeCountQuery} AS likes FROM books AS b 
+    let sql;
+    let values = [];
+
+    const likeCountQuery = ', (SELECT COUNT(*) FROM likes WHERE likes.book_id = b.id) AS likes';
+
+    sql = `SELECT b.*,c.name AS category_name${likeCountQuery} FROM books AS b 
             LEFT JOIN categoris As c ON b.category_id = c.id`;
 
-    values = [];
-
     //옵션에 따른 SQL 조정
-    console.log("sss : " + (category_id && news));
     if (category_id && news) {
         sql += ' WHERE b.category_id = ? AND b.pub_date BETWEEN DATE_SUB(DATE(NOW()), INTERVAL 1 MONTH) AND DATE(NOW())';
-        console.log('1 : ' + sql);
-        values.push(category_id);
+        values.push(categoryId);
     }
-    else if (category_id) {
+    else if (categoryId) {
         sql = sql + ' WHERE b.category_id = ? ';
-        console.log('2 : ' + sql);
-        values.push(category_id);
+        values.push(categoryId);
     } else if (news) {
-        console.log("not here");
         sql += ' WHERE b.pub_date BETWEEN DATE_SUB(DATE(NOW()), INTERVAL 1 MONTH) AND DATE(NOW())';
-        console.log('3 : ' + sql);
     }
 
     //페이징 추가
@@ -36,62 +32,82 @@ async function getBooks(conn,{ category_id, news, limit, page }) {
         }
         values.push(parseInt(limit), offset);
     }
-    console.log(sql);
     try {
         const [rows, fields] = await conn.execute(sql, values);
-        return rows;
+        return stringUtil.keySnakeToCamel(rows);
     }
     catch (err) {
-        console.error(err);
         throw err;
 
     }
-
-    // db.query(sql, values, (err, result, fields) => {
-    //     if (err) {
-    //         console.log(err);
-    //         reject(err);
-    //     }
-    //     else {
-    //         resolve(result);
-    //     }
-    // })
-    //})
 }
 
-async function getBookDetialById(conn,id) {
+async function getBookDetialById(conn, id, memberId) {
+    let values = [];
+    const likeCountQuery = ',(SELECT COUNT(*) FROM likes WHERE likes.book_id = b.id) AS likes';
+    let memberLikedQuery = '';
 
-    const likeCountQuery = '(SELECT COUNT(*) FROM likes WHERE likes.book_id = b.id)';
-    const sql = `SELECT b.*,c.name AS category_name, ${likeCountQuery} AS likes FROM books AS b LEFT JOIN categoris As c ON b.category_id = c.id WHERE b.id=?`;
-    const values = [id];
+    if (memberId) {
+        memberLikedQuery = ', EXISTS (SELECT 1 FROM likes WHERE member_id = ? AND book_id = b.id) AS liked';
+    }
+    const sql =
+        `SELECT b.*,c.name AS category_name
+    ${likeCountQuery}
+    ${memberLikedQuery}
+     FROM books AS b 
+     LEFT JOIN categoris As c ON b.category_id = c.id 
+     WHERE b.id=?`;
+    values.push(id);
     try {
         const [rows, fields] = await conn.execute(sql, values);
-        return rows[0];
+        return stringUtil.keySnakeToCamel(rows[0]);
     }
     catch (err) {
-        console.error(err);
         throw err;
-
     }
 
 }
 async function getAllCategory(conn) {
 
-        const sql = 'SELECT * FROM categoris';
-        try {
-            const [rows,fields] = await conn.execute(sql);
-            return rows;
-        }
-        catch(err){
-            console.error(err);
-            throw err;
-
-        }
-
-
+    const sql = 'SELECT * FROM categoris';
+    try {
+        const [rows, fields] = await conn.execute(sql);
+        return stringUtil.keySnakeToCamel(rows);
+    }
+    catch (err) {
+        throw err;
+    }
 }
+async function totalBooksCount(conn, categoryId, news) {
+    console.log("--model-totalBooksCount 호출");
+    let sql = 'SELECT COUNT(*) As count FROM books AS b';
+    let values = [];
+
+    if (categoryId && news) {
+        sql += ' WHERE b.category_id = ? AND b.pub_date BETWEEN DATE_SUB(DATE(NOW()), INTERVAL 1 MONTH) AND DATE(NOW())';
+        values.push(category_id);
+    }
+    else if (categoryId) {
+        sql = sql + ' WHERE b.category_id = ? ';
+
+        values.push(categoryId);
+    } else if (news) {
+        sql += ' WHERE b.pub_date BETWEEN DATE_SUB(DATE(NOW()), INTERVAL 1 MONTH) AND DATE(NOW())';
+    }
+    try {
+        const [rows, fields] = await conn.execute(sql, values);
+        return rows[0].count;
+    }
+    catch (err) {
+        throw err;
+    }
+}
+
+
+
 module.exports = {
     getBooks,
     getBookDetialById,
-    getAllCategory
+    getAllCategory,
+    totalBooksCount
 }

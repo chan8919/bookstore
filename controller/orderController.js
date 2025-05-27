@@ -10,7 +10,7 @@ require('dotenv').config();
 const orderItems = async (req, res) => {
     console.log('orderItems 컨트롤러 호출');
     const inputData = matchedData(req, { locations: ['body', 'params', 'query'] });
-
+    const {memberId} = req.user;
     let conn;
     try {
             // DB 커넥션 생성성
@@ -22,21 +22,20 @@ const orderItems = async (req, res) => {
         const delivery = await orderModel.addDelivery(conn,inputData['delivery']['address'], inputData['delivery']['receiver'], inputData['delivery']['contact']);
 
         //주문 생성 (추가)
-        const cartitemids = inputData['items'].map(item => item['cartItem_id']);
-        const total_price = await orderModel.calculateTotalPriceByIds(conn,cartitemids);
-
-        const order = await orderModel.addOrder(conn,inputData['member_id'], delivery.insertId, total_price);
+        const cartItemIds = inputData['items'].map(item => item['cartItemId']);
+        const totalPrice = await orderModel.calculateTotalPriceByIds(conn,cartItemIds);
+        const order = await orderModel.addOrder(conn,memberId, delivery.insertId, totalPrice);
 
         //주문 항목 생성 (추가)
         // addOrderItems에 사용할 수있는 itemlist를 만들어야함
         const inputOrderItems = inputData['items'];
         let orderitemlist = [];
         inputOrderItems.forEach((value, index) => {
-            orderitemlist.push([order.insertId, value['book_id'], value['quantity']]);
+            orderitemlist.push([order.insertId, value['bookId'], value['quantity']]);
         })
         await orderModel.addOrderItems(conn,orderitemlist);
         // 카트 아이템 제거
-        cartItemModel.deleteCartItemsByIds(conn,cartitemids);
+        cartItemModel.deleteCartItemsByIds(conn,cartitemIds);
 
         // 완료되면 커넥션 커밋
         await conn.commit();

@@ -9,12 +9,13 @@ require('dotenv').config();
 const addToCart = async (req, res) => {
     console.log('addToCart 컨트롤러 호출');
     const inputData = matchedData(req, { locations: ['body', 'params', 'query'] });
+    const {memberId} = body.user;
     let conn;
     try {
         // DB 커넥션 생성성
         conn = await dbPool.getConnection();
         //장바구니에 이미 있는 항목인지 확인
-        let cartItem = await cartItemModel.getCartItem(conn, inputData['member_id'], inputData['book_id']);
+        let cartItem = await cartItemModel.getCartItem(conn, memberId, inputData['bookId']);
         if (cartItem) {
             // 기존 항목에 quantity 만큼 추가
             const targetQuantity = inputData['quantity'] + cartItem.quantity;
@@ -22,7 +23,7 @@ const addToCart = async (req, res) => {
             res.status(StatusCodes.OK).json({ "message": "이미 항목이 존재합니다. 주문하신 수량만큼 추가되었습니다" });
             return;
         } else {
-            await cartItemModel.addCartItems(conn, inputData['member_id'], inputData['book_id'], inputData['quantity']);
+            await cartItemModel.addCartItems(conn, memberId, inputData['bookId'], inputData['quantity']);
             res.status(StatusCodes.CREATED).json({ "message": "장바구니에 항목이 추가되었습니다" });
             return;
         }
@@ -38,11 +39,12 @@ const addToCart = async (req, res) => {
 
 const getCartItemList = async (req, res) => {
     const inputData = matchedData(req, { locations: ['body', 'params', 'query'] });
+    const {memberId} = body.user;
     let conn;
     try {
         // DB 커넥션 생성성
         conn = await dbPool.getConnection();
-        const items = await cartItemModel.getCartItemsByMemberId(conn, inputData['member_id']);
+        const items = await cartItemModel.getCartItemsByMemberId(conn, memberId);
         console.log(items);
         res.status(StatusCodes.OK).json({ "message": "사용자의 장바구니 목록입니다", "books": items });
     }
@@ -69,8 +71,6 @@ const deleteCartItem = async (req, res) => {
             res.status(StatusCodes.NOT_FOUND).json({ "message": "항목이 존재하지 않습니다 " });
             return;
         }
-
-
     }
     catch (err) {
         console.error(err);

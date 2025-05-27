@@ -2,22 +2,15 @@ const express = require('express');
 const router = express.Router();
 const { param,body, validationResult } = require('express-validator');
 const { setlike } = require('../controller/likeController');
-//router.use(express.json());
-
-function validate(req, res, next) {
-    const validatorErr = validationResult(req);
-    if (!validatorErr.isEmpty()) {
-        console.log(validatorErr.array());
-        res.status(400).json({ 'message': validatorErr.array() });
-        return;
-    }
-    next();
-}
+const authUtil = require('../utiles/authenticationUtils');
+const {validate} = require('../utiles/validation');
+router.use(express.json());
 
 router
-    .route('/:book_id')
+    .route('/:bookId')
     .put([
-        param('book_id').notEmpty().isInt().withMessage('book id정보 이상').toInt(),
+        authUtil.EnsureAuthorization(),
+        param('bookId').notEmpty().isInt().withMessage('book id정보 이상').toInt(),
         validate
     ],
     setlike

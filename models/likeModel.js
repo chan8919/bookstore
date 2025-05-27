@@ -1,4 +1,5 @@
 const db = require('../database/mariadb');
+const stringUtil = require('../utiles/stringUtils');
 
 
 async function addLike(conn,memberId, bookId) {
@@ -71,7 +72,7 @@ async function getLikesForbook(conn,bookId) {
     values = [parseInt(bookId)];
     try {
         const [rows, fields] = await db.execute(sql, values);
-        return rows[0];
+        return stringUtil.keySnakeToCamel(rows[0]);
     }
     catch (err) {
         console.error(err);

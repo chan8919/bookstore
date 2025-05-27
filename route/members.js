@@ -2,17 +2,9 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { join,login,resetPassword,resetRequestPassword } = require('../controller/memberController');
-//router.use(express.json());
-
-function validate(req, res, next) {
-    const validatorErr = validationResult(req);
-    if (!validatorErr.isEmpty()) {
-        console.log(validatorErr.array());
-        res.status(400).json({ 'message': validatorErr.array() });
-        return;
-    }
-    next();
-}
+const authUtil = require('../utiles/authenticationUtils');
+const {validate} = require('../utiles/validation');
+router.use(express.json());
 
 router
     .route('/join')
